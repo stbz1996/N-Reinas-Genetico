@@ -1,16 +1,16 @@
 import random
 
 linux_flag = 1
-board_size = 8
-population_size = 100
-mutation_percent = 0.02
-limit_gens = 500
-eliticism = 0
-population = []
-offsprings = []
+tamano_tablero = 8
+tamano_poblacion = 100
+porcentaje_mutacion = 0.02
+limite_genes = 500
+eliticismo = 0
+poblacion = []
+descendientes = []
 fitness = []
-fitness_new = []
-cant_selected = int(population_size * 0.1)
+fitness_nuevo = []
+cant_seleccionada = int(tamano_poblacion * 0.1)
 
 
 #Function that adds the individual to a generation and calculates fitness
@@ -18,25 +18,25 @@ def add_individual(child, new_or_old):
     
     #new is 1, old is 0 
     if (new_or_old==0): 
-        population.append(child)
+        poblacion.append(child)
         fitness.append(check(child))
         
     else: 
-        offsprings.append(child)
-        fitness_new.append(check(child))
+        descendientes.append(child)
+        fitness_nuevo.append(check(child))
         
 
 
-#Function that generate the population, also evaluates it 
+#Function that generate the poblacion, also evaluates it
 def generate_population(): 
-    for i in range(population_size):
+    for i in range(tamano_poblacion):
         #generates only one
         individual = []
-        for j in range(board_size):
+        for j in range(tamano_tablero):
             #adding the genes
-            individual.append(random.randint(0,board_size-1))
-        #add to the population or group 
-        #adds the fitness to the fitness array that corresponds to population too. 
+            individual.append(random.randint(0, tamano_tablero - 1))
+        #add to the poblacion or group
+        #adds the fitness to the fitness array that corresponds to poblacion too.
         add_individual(individual, 0)
         
 
@@ -45,21 +45,21 @@ def generate_population():
 def check(individual):
     collisions = 0
     #Check collisions in row
-    for i in range(board_size):
+    for i in range(tamano_tablero):
         if i not in individual:
             collisions += 1
 
     #Check collisions in diagonals
-    for i in range(0,board_size-1):
+    for i in range(0, tamano_tablero - 1):
     
         #Check right upper
-        for j, k in zip(range(individual[i]-1,-1,-1), range(i+1,board_size)):
+        for j, k in zip(range(individual[i]-1,-1,-1), range(i+1, tamano_tablero)):
             if individual[k] == j:
                 collisions += 1
                 break
                 
         #Check right lower
-        for j, k in zip(range(individual[i]+1,board_size), range(i+1,board_size)):
+        for j, k in zip(range(individual[i]+1, tamano_tablero), range(i + 1, tamano_tablero)):
             if individual[k] == j:
                 collisions += 1
                 break
@@ -73,28 +73,28 @@ def check(individual):
 def mutate_after_creation(child): 
     for i in range(len(child)): 
         random_mutate = random.randint(0,100) / 100
-        if (random_mutate < mutation_percent): 
-            child[random.randint(0,board_size-1)] = random.randint(0,board_size-1) #change a random gen 
+        if (random_mutate < porcentaje_mutacion):
+            child[random.randint(0, tamano_tablero - 1)] = random.randint(0, tamano_tablero - 1) #change a random gen
     add_individual(child, 1)
 
 
 
 #Function that represents the process of selection, which 
 def tournament_selection():
-    random_selection = random.sample(list(enumerate(fitness)),cant_selected)
+    random_selection = random.sample(list(enumerate(fitness)), cant_seleccionada)
     #print(random_selection)
     best_fitness = min(random_selection, key = lambda t: t[1]) #minimun fitness on the sample, tuple = (index, fitness)
     #print(best_fitness)
-    best_individual = population[best_fitness[0]]
+    best_individual = poblacion[best_fitness[0]]
     return best_individual
 
 
 def elitism():
     list_index_fitness = list(enumerate(fitness))
     best = sorted(list_index_fitness, key = lambda t: t[1])
-    best = best[:cant_selected]
+    best = best[:cant_seleccionada]
     for i in best:
-        add_individual(population[i[0]],1)
+        add_individual(poblacion[i[0]], 1)
     
     
     
@@ -109,18 +109,18 @@ def crossover(father, mother):
     mutate_after_creation(child_two)
 
 def create_new_population(): 
-    global population
-    global offsprings
+    global poblacion
+    global descendientes
     global fitness
-    global fitness_new
-    if (eliticism == 1): 
-        for i in range(int((population_size - cant_selected)/2)):
+    global fitness_nuevo
+    if (eliticismo == 1):
+        for i in range(int((tamano_poblacion - cant_seleccionada) / 2)):
             best_1 = tournament_selection()
             best_2 = tournament_selection()
             crossover(best_1,best_2)
         elitism()
     else: 
-        for i in range(int(population_size/2)):
+        for i in range(int(tamano_poblacion / 2)):
             best_1 = tournament_selection()
             best_2 = tournament_selection()
             crossover(best_1,best_2)
@@ -147,31 +147,24 @@ def get_matrix_solution(solution):
     
 def print_solution(solution):
     matrix_solution = get_matrix_solution(solution)
-    matrix_cont = 0 
-    
-    #Condition if program running in Windows OS
-    if not linux_flag:
-    	bcolors.RED = ""
-    	bcolors.WHITE = ""
-    	bcolors.GREEN = ""
-    	bcolors.BLACK = ""
+    matrix_cont = 0
     	
-    for i in range(board_size*2+1): #para futuro deberia ser solution * 2 - 1
+    for i in range(tamano_tablero * 2 + 1): #para futuro deberia ser solution * 2 - 1
         if (i == 0):
-            print(bcolors.RED + "  " + " - ".join("+" for i in range(board_size+1)) + bcolors.WHITE)
+            print("  " + " - ".join("+" for i in range(tamano_tablero + 1)))
         elif (i%2 != 0):
-            answer = " " + bcolors.RED + " |" + bcolors.WHITE 
+            answer = " " + " |"
             row = matrix_solution[matrix_cont]
             for j in range(len(solution)):
                 answer += " "
-                if(row[j] == 0 and (matrix_cont+j) %2 == 1): answer += bcolors.BLACK
-                if(row[j] == 1):answer += bcolors.GREEN
-                answer += str(row[j]) + bcolors.RED + " |" + bcolors.WHITE
+                if(row[j] == 0 and (matrix_cont+j) %2 == 1): answer
+                if(row[j] == 1):answer
+                answer += str(row[j]) + " |"
             answer += "  " + str(matrix_cont)
             matrix_cont += 1 
             print(answer)
         elif (i%2 == 0):
-            print(bcolors.RED + "  " + " - ".join("+" for i in range(board_size+1)) + bcolors.WHITE)
+            print("  " + " - ".join("+" for i in range(tamano_tablero + 1)))
 
              
 def is_int(number):
@@ -196,7 +189,7 @@ def choose_option():
 
 
 def modify_board_size():
-    global board_size
+    global tamano_tablero
     b_size = input("Enter board size (minimum 4): ")
     if is_int(b_size):
         b_size = int(b_size)
@@ -211,10 +204,10 @@ def modify_board_size():
 
 
 def modify_population_size():
-    global population_size
-    global cant_selected #int(population_size * 0.1)
+    global tamano_poblacion
+    global cant_seleccionada #int(tamano_poblacion * 0.1)
     
-    p_size = input("Enter population size (minimum 50): ")
+    p_size = input("Enter poblacion size (minimum 50): ")
     if is_int(p_size):
         p_size = int(p_size)
         if p_size >= 50:
@@ -229,7 +222,7 @@ def modify_population_size():
             
 
 def modify_mutation_percent():
-    global mutation_percent    
+    global porcentaje_mutacion
     m_size = input("Enter mutation percent (1-5): ")
     if is_int(m_size):
         m_size = int(m_size)
@@ -244,7 +237,7 @@ def modify_mutation_percent():
 
 
 def modify_limit_gens():
-    global limit_gens
+    global limite_genes
     g_size = input("Enter generations limit (minimum 50): ")
     if is_int(g_size):
         g_size = int(g_size)
@@ -259,7 +252,7 @@ def modify_limit_gens():
 
 
 def modify_elitism():
-    global eliticism
+    global eliticismo
     e_value = input("Elitism? (yes:1 no:0): ")
     if is_int(e_value):
         e_value = int(e_value)
@@ -289,7 +282,9 @@ def choose_step_print():
             
 def main():
     solution = 0
-    print("\nN-Queen Problem Solution using genetics\n")
+    print("#####################################################")
+    print("## Problema de N-Reinas con algoritmos genéticos ####")
+    print("#####################################################")
     print("To start the program choose the types of values to use\n")
     print("\n 1.Default values(*)\n 2.Custom values")
     print("\n(*)Default values: \n\t-Board size: 8 \n\t-Population: 100 individuals\n\t-Generations: 500",
@@ -305,30 +300,28 @@ def main():
     
     steps_flag = choose_step_print()
     generate_population()
-    for i in range(limit_gens): 
+    for i in range(limite_genes):
         create_new_population()
         if steps_flag:
             best_fitness = min(fitness)
             index = fitness.index(best_fitness)
-            best_gen = population[index] 
+            best_gen = poblacion[index]
             print("\nGeneration: "+ str(i))
-            print("  Best gen: " + str(population[index]) + ", fitness: " + str(best_fitness))
+            print("  Best gen: " + str(poblacion[index]) + ", fitness: " + str(best_fitness))
         if 0 in fitness:
-            print("\nThere IS a solution in the population. \nStats:")
-            #print("Number of individuals: " + str(population_size))
-            print("Number of generations executed: " + str(i) + " of " + str(limit_gens))
-            #print("Mutation percent: " + str(mutation_percent))
+            print("\nThere IS a solution in the poblacion.")
+            print("Number of generations executed: " + str(i) + " of " + str(limite_genes))
             index = fitness.index(0)
-            print("Short answer: " + str(population[index]))
+            print("Short answer: " + str(poblacion[index]))
             print("\nLong answer: \n1: queens\n0: blank space")
-            print_solution(population[index])
+            print_solution(poblacion[index])
             solution = 1
             break
     if(solution == 0): 
-        print("There was no solution in the final population.")
-        #print("Number of individuals: " + str(population_size))
-        #print("Number of generations executed: " + str(limit_gens))
-        #print("Mutation percent: " + str(mutation_percent))
+        print("There was no solution in the final poblacion.")
+        #print("Number of individuals: " + str(tamano_poblacion))
+        #print("Number of generations executed: " + str(limite_genes))
+        #print("Mutation percent: " + str(porcentaje_mutacion))
 
 
 if __name__ == "__main__":

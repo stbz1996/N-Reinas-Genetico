@@ -1,6 +1,10 @@
 import random
 
-bandera = 1
+
+##########################################################
+##        Retorna true si el valor es un entero         ##
+##########################################################
+bandera_linux = 1
 tamano_tablero = 8
 tamano_poblacion = 100
 porcentaje_mutacion = 0.02
@@ -10,182 +14,102 @@ poblacion = []
 descendientes = []
 fitness = []
 fitness_nuevo = []
-cant_selected = int(tamano_poblacion * 0.1)
+cant_seleccionada = int(tamano_poblacion * 0.1)
 
 
-##########################################################
-##        Retorna true si el valor es un entero         ##
-##########################################################
-def es_int(num):
-    try:
-        int(num)
-        return True
-    except ValueError:
-        return False
+# Function that adds the individual to a generation and calculates fitness
+def agregar_individuo(hijo, nuevo_viejo):
+    if (nuevo_viejo == 0):
+        poblacion.append(hijo)
+        fitness.append(verificar(hijo))
 
-#################################################
-##      Modifica el tamaño del tablero         ##
-#################################################
-def verificar(individual):
+    else:
+        descendientes.append(hijo)
+        fitness_nuevo.append(verificar(hijo))
+
+
+# Function that generate the poblacion, also evaluates it
+def generar_poblacion():
+    for i in range(tamano_poblacion):
+        individuo = []
+        for j in range(tamano_tablero):
+            individuo.append(random.randint(0, tamano_tablero - 1))
+        agregar_individuo(individuo, 0)
+
+
+# Function that returns the total of collisions of an individual
+def verificar(individuo):
     colisiones = 0
-    # Verifica colisiones en la fila
-    for i in range(tamano_tablero):
-        if i not in individual:
+    for i in range(tamano_tablero): #verifica colisiones en la fila
+        if i not in individuo:
             colisiones += 1
 
-    # Verifica colisiones en las diagonales
+    # Verifica colisiones en diagonal
     for i in range(0, tamano_tablero - 1):
 
-        # Verifica derecha arriba
-        for j, k in zip(range(individual[i] - 1, -1, -1), range(i + 1, tamano_tablero)):
-            if individual[k] == j:
+        # Derecha arriba
+        for j, k in zip(range(individuo[i] - 1, -1, -1), range(i + 1, tamano_tablero)):
+            if individuo[k] == j:
                 colisiones += 1
                 break
 
-        # Verifica derecha abajo
-        for j, k in zip(range(individual[i] + 1, tamano_tablero), range(i + 1, tamano_tablero)):
-            if individual[k] == j:
+        # Derecha abajo
+        for j, k in zip(range(individuo[i] + 1, tamano_tablero), range(i + 1, tamano_tablero)):
+            if individuo[k] == j:
                 colisiones += 1
                 break
 
     return colisiones
 
 
-#################################################
-##      Modifica el tamaño del tablero         ##
-#################################################
-def modificar_tamano_tablero():
-    global tamano_tablero
-    b_tamano = input("Ingrese el tamaño del tablero: ")
-    if es_int(b_tamano):
-        if int(b_tamano) > 3:
-            tamano_tablero = int(b_tamano)
-        else:
-            input("El número debe ser mayor o igual a 4, precione ENTER para continuar")
-            modificar_tamano_tablero()
-    else:
-        input("Valor incorrecto, precione ENTER para continuar")
-        modificar_tamano_tablero()
-
-
-#####################################################
-##        Modifica el tamaño de la población       ##
-#####################################################
-def modificar_tamano_poblacion():
-    global cantidad_seleccionada
-    global tamano_poblacion
-    b_tamano = input("Ingrese el tamaño de la población: ")
-    if es_int(b_tamano):
-        b_tamano = int(b_tamano)
-        if b_tamano >= 50:
-            tamano_poblacion = b_tamano
-            cantidad_seleccionada = int(tamano_poblacion * 0.1)
-        else:
-            input("El número debe ser mayor o igual a 50, precione ENTER para continuar")
-            modificar_tamano_poblacion()
-    else:
-        input("Valor incorrecto, precione ENTER para continuar")
-        modificar_tamano_poblacion()
-
-
-#####################################################
-##         Modifica el % de la mutación            ##
-#####################################################
-def modificar_porcentaje_mutacion():
-    global porcentaje_mutacion
-    m_tamano = input("Ingrese el % de mutación, entre 1 y 5: ")
-    if es_int(m_tamano):
-        m_tamano = int(m_tamano)
-        if 1 <= m_tamano <= 5:
-            porcentaje_mutacion = m_tamano / 100
-        else:
-            input("El número debe estar entre 1 y 5, precione ENTER para continuar")
-            modificar_porcentaje_mutacion()
-    else:
-        input("Valor incorrecto, precione ENTER para continuar")
-        modificar_porcentaje_mutacion()
-
-
-#####################################################
-##         Modifica el limite de genes             ##
-#####################################################
-def modificar_limite_genes():
-    global limite_genes
-    g_tamano = input("Ingrese el límite de generaciones (Al menos 50): ")
-    if es_int(g_tamano):
-        g_tamano = int(g_tamano)
-        if g_tamano >= 50:
-            limite_genes = g_tamano
-        else:
-            input("El número debe ser mayor o igual a 50, precione ENTER para continuar")
-            modificar_limite_genes()
-    else:
-        input("Valor incorrecto, precione ENTER para continuar")
-        modificar_limite_genes()
-
-
-def agregar_individual(hijo, nuevo_o_viejo):
-    if (nuevo_o_viejo == 0):
-        poblacion.append(hijo)
-        fitness.append(verificar(hijo))
-    else:
-        descendientes.append(hijo)
-        fitness_nuevo.append(verificar(hijo))  ## Falta esta funcion de traducir
-
-
-#####################################################
-##         Función que muta al hijo                ##
-#####################################################
-def mutar(hijo):
+# Function that mutate child
+def mutar_hijo(hijo):
     for i in range(len(hijo)):
-        mutacion_aleatoria = random.randint(0, 100) / 100
-        if (mutacion_aleatoria < porcentaje_mutacion):
-            hijo[random.randint(0, tamano_tablero - 1)] = random.randint(0, tamano_tablero - 1)  # cambia aleatoriamente un gen
-    agregar_individual(hijo, 1)
+        mutacion_random = random.randint(0, 100) / 100
+        if (mutacion_random < porcentaje_mutacion):
+            hijo[random.randint(0, tamano_tablero - 1)] = random.randint(0, tamano_tablero - 1)  # cambiar gen
+    agregar_individuo(hijo, 1)
 
-#####################################################
-##       Proceso de seleccion de la poblacion      ##
-#####################################################
+
 # Function that represents the process of selection, which
 def seleccion():
-    seleccion_aleatoria = random.sample(list(enumerate(fitness)), cant_selected)
+    seleccion_random = random.sample(list(enumerate(fitness)), cant_seleccionada)
 
-    mejor_fitness = min(seleccion_aleatoria, key=lambda t: t[1])  # tupla = (index, fitness)
+    mejor_fitness = min(seleccion_random, key=lambda t: t[1])  #tupla = (index, fitness)
 
     mejor_individuo = poblacion[mejor_fitness[0]]
     return mejor_individuo
 
 
-def seleccionar_elite():
-    lista_indices_fitness = list(enumerate(fitness))
-    mejor = sorted(lista_indices_fitness, key=lambda t: t[1])
-    mejor = mejor[:cant_selected]
+def elitismo():
+    lista_indice_fitness = list(enumerate(fitness))
+    mejor = sorted(lista_indice_fitness, key=lambda t: t[1])
+    mejor = mejor[:cant_seleccionada]
     for i in mejor:
-        agregar_individual(poblacion[i[0]], 1)
+        agregar_individuo(poblacion[i[0]], 1)
 
-#####################################################
-##      Combina los padres y retorna 2 hijos       ##
-#####################################################
-def crossover(padre, madre):
+
+# Function that combines the father and the mother, returns two childs
+def crossover(padre, padre2):
     pos = random.randint(1, 6)
-    hijo1 = padre[:pos] + madre[pos:]
-    hijo2 = madre[:pos] + padre[pos:]
+    hijo1 = padre[:pos] + padre2[pos:]
+    hijo2 = padre2[:pos] + padre[pos:]
+    # return (hijo1, hijo2)
+    mutar_hijo(hijo1)
+    mutar_hijo(hijo2)
 
-    mutar(hijo1)
-    mutar(hijo2)
 
-
-def crear_nueva_poblacion():
+def crear_poblacion():
     global poblacion
     global descendientes
     global fitness
     global fitness_nuevo
     if (eliticismo == 1):
-        for i in range(int((tamano_poblacion - cant_selected) / 2)):
+        for i in range(int((tamano_poblacion - cant_seleccionada) / 2)):
             mejor1 = seleccion()
             mejor2 = seleccion()
             crossover(mejor1, mejor2)
-        seleccionar_elite()
+        elitismo()
     else:
         for i in range(int(tamano_poblacion / 2)):
             mejor1 = seleccion()
@@ -202,7 +126,7 @@ def get_solucion(solucion):
     tamano_solucion = len(solucion)
     for i in range(tamano_solucion):
         fila = []
-        for j in range(tamano_solucion):  # row
+        for j in range(tamano_solucion):
             if (i != solucion[j]):
                 fila.append(0)
             else:
@@ -211,79 +135,180 @@ def get_solucion(solucion):
     return matriz
 
 
-def generar_poblacion():
-    for i in range(tamano_poblacion):
-        individual = []
-        for j in range(tamano_tablero):
-            individual.append(random.randint(0, tamano_tablero - 1))
-        agregar_individual(individual, 0)
-
-
-def imprimir_solucion(solucion):
+def imprimir(solucion):
     matriz_solucion = get_solucion(solucion)
     matriz_cont = 0
 
-    # Condition if program running in Windows OS
-    if not bandera:
-        bcolors.RED = ""
-        bcolors.WHITE = ""
-        bcolors.GREEN = ""
-        bcolors.BLACK = ""
-
     for i in range(tamano_tablero * 2 + 1):
         if (i == 0):
-            print(bcolors.RED + "  " + " - ".join("+" for i in range(tamano_tablero + 1)) + bcolors.WHITE)
+            print("  " + " - ".join("+" for i in range(tamano_tablero + 1)))
         elif (i % 2 != 0):
-            respuesta = " " + bcolors.RED + " |" + bcolors.WHITE
+            respuesta = " " + " |"
             fila = matriz_solucion[matriz_cont]
             for j in range(len(solucion)):
                 respuesta += " "
-                if (fila[j] == 0 and (matriz_cont + j) % 2 == 1): respuesta += bcolors.BLACK
-                if (fila[j] == 1): respuesta += bcolors.GREEN
-                respuesta += str(fila[j]) + bcolors.RED + " |" + bcolors.WHITE
-            respuesta += "  " + str(matriz_cont)
+                if (fila[j] == 0 and (matriz_cont + j) % 2 == 1): respuesta
+                if (fila[j] == 1): respuesta
+                respuesta += str(fila[j]) + " |"
+            respuesta += "  " + str(matriz_cont + 1)
             matriz_cont += 1
             print(respuesta)
         elif (i % 2 == 0):
-            print(bcolors.RED + "  " + " - ".join("+" for i in range(tamano_tablero + 1)) + bcolors.WHITE)
+            print("  " + " - ".join("+" for i in range(tamano_tablero + 1)))
+
+
+def es_entero(num):
+    try:
+        int(num)
+        return True
+
+    except ValueError:
+        return False
+
+
+def elegir_opcion():
+    opcion = input("Elegir opcion: ")
+    if es_entero(opcion):
+        opcion = int(opcion)
+        if 0 < opcion < 3:
+            return opcion
+
+    input("Valor incorrecto, presione ENTER para volver")
+    opcion = elegir_opcion()
+    return opcion
+
+
+def modificar_tamano_tablero():
+    global tamano_tablero
+    tam_tab = input("Seleccione tamano del tablero (minimo 4): ")
+    if es_entero(tam_tab):
+        tam_tab = int(tam_tab)
+        if tam_tab >= 4:
+            tamano_tablero = tam_tab
+        else:
+            input("Tablero debe ser mas grande, presione ENTER para volver")
+            modificar_tamano_tablero()
+    else:
+        input("Valor incorrecto, presione ENTER para volver")
+        modificar_tamano_tablero()
+
+
+def modificar_tamano_poblacion():
+    global tamano_poblacion
+    global cant_seleccionada
+
+    tam_p = input("Seleccione tamano de poblacion (minimo 50): ")
+    if es_entero(tam_p):
+        tam_p = int(tam_p)
+        if tam_p >= 50:
+            tamano_poblacion = tam_p
+            cant_seleccionada = int(tamano_poblacion * 0.1)
+        else:
+            input("Poblacion deberia ser mas grande, presione ENTER para volver")
+            modificar_tamano_poblacion()
+    else:
+        input("Valor incorrecto, presione ENTER para volver")
+        modificar_tamano_poblacion()
+
+
+def modificar_porcentaje_mutacion():
+    global porcentaje_mutacion
+    porcent_mut = input("Seleccione porcentaje de mutacion (1-5): ")
+    if es_entero(porcent_mut):
+        porcent_mut = int(porcent_mut)
+        if 1 <= porcent_mut <= 5:
+            porcentaje_mutacion = porcent_mut / 100
+        else:
+            input("Valor fuera de rango, presione ENTER para volver")
+            modificar_porcentaje_mutacion()
+    else:
+        input("Valor incorrecto, presione ENTER para volver")
+        modificar_porcentaje_mutacion()
+
+
+def modificar_limite_genes():
+    global limite_genes
+    tam_g = input("Ingrese limite de generaciones (minimum 50): ")
+    if es_entero(tam_g):
+        tam_g = int(tam_g)
+        if tam_g >= 50:
+            limite_genes = tam_g
+        else:
+            input("Fuera de rango, presione ENTER para volver")
+            modificar_limite_genes()
+    else:
+        input("Valor incorrecto, presione ENTER para volver")
+        modificar_limite_genes()
+
+
+def modificar_eliticismo():
+    global eliticismo
+    val_e = input("Eliticismo? 1)si 0)no: ")
+    if es_entero(val_e):
+        val_e = int(val_e)
+        if val_e == 0 or val_e == 1:
+            eliticismo = val_e
+    else:
+        input("Valor incorrecto, presione ENTER para volver")
+        modificar_eliticismo()
+
+
+def impresion_pasos():
+    opcion = input("Desea imprimir paso a paso? 1)si 0)no: ")
+    if es_entero(opcion):
+        opcion = int(opcion)
+        if 0 <= opcion < 2:
+            return opcion
+
+    input("Valor incorrecto, presione ENTER para volver")
+    opcion = elegir_opcion()
+    return opcion
 
 
 def main():
-    solution = 0
+    solucion = 0
     print("#####################################################")
     print("## Problema de N-Reinas con algoritmos genéticos ####")
     print("#####################################################")
+    print("Para comenzar, seleccione los valores\n")
+    print("\n 1.Valores por Defecto:\n\t-Tamano tablero: 8 \n\t-Poblacion: 100 individuos\n\t-Generaciones: 500",
+          "\n\t-Porcentaje mutacion: 2% \n\t-Elitismo: No aplica")
+    print("\n 2.Valores Personalizados\n")
+    option = elegir_opcion()
 
-    modificar_tamano_tablero()
-    modificar_tamano_poblacion()
-    modificar_limite_genes()
-    modificar_porcentaje_mutacion()
+    if option == 2:
+        modificar_tamano_tablero()
+        modificar_tamano_poblacion()
+        modificar_limite_genes()
+        modificar_porcentaje_mutacion()
+        modificar_eliticismo()
 
+    bandera_pasos = impresion_pasos()
     generar_poblacion()
-    # for i in range(limite_genes):
-    #    crear_nueva_poblacion()
-    #    if steps_flag:
-    #        best_fitness = min(fitness)
-    #        index = fitness.index(best_fitness)
-    #        best_gen = population[index]
-    #        print("\nGeneration: "+ str(i))
-    #        print("  Best gen: " + str(population[index]) + ", fitness: " + str(best_fitness))
-    #    if 0 in fitness:
-    #        print("\nThere IS a solution in the population. \nStats:")
-    #        #print("Number of individuals: " + str(population_size))
-    #        print("Number of generations executed: " + str(i) + " of " + str(limite_genes))
-    #        #print("Mutation percent: " + str(porcentaje_mutacion))
-    #        index = fitness.index(0)
-    #        print("Short answer: " + str(population[index]))
-    #        print("\nLong answer: \n1: queens\n0: blank space")
-    #        imprimir_solucion(population[index])
-    #        solution = 1
-    #        break
-    # if(solution == 0):
-    #    print("There was no solution in the final population.")
-    # print("Number of individuals: " + str(population_size))
-    # print("Number of generations executed: " + str(limite_genes))
-    # print("Mutation percent: " + str(porcentaje_mutacion))
+
+    for i in range(limite_genes):
+        crear_poblacion()
+
+        if bandera_pasos:
+            mejor_fitness = min(fitness)
+            indice = fitness.index(mejor_fitness)
+            mejor_gen = poblacion[indice]
+            print("\nGeneracion: " + str(i))
+            print("  Mejor generacion " + str(poblacion[indice]) + "--> fitness: " + str(mejor_fitness))
+        if 0 in fitness:
+            print("\nSOLUCION encontrada.")
+            print("Numero de generaciones realizadas: " + str(i) + " of " + str(limite_genes))
+            indice = fitness.index(0)
+            print("Respuesta Corta: " + str(poblacion[indice]))
+            print("\nRespuesta Larga: \n1: Reinas\n0: Espacio en blanco")
+            imprimir(poblacion[indice])
+            solucion = 1
+            break
+    if (solucion == 0):
+        print("No hubo ninguna solucion.")
+        # print("Number of individuals: " + str(tamano_poblacion))
+        # print("Number of generations executed: " + str(limite_genes))
+        # print("Mutation percent: " + str(porcentaje_mutacion))
 
 
 if __name__ == "__main__":
