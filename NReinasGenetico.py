@@ -1,3 +1,17 @@
+import random
+
+linux_flag = 1
+tamano_tablero = 8
+tamano_poblacion = 100
+mutation_percent = 0.02
+limit_gens = 500
+eliticism = 0
+poblacion = []
+descendientes = []
+fitness = []
+fitness_new = []
+cant_selected = int(tamano_poblacion * 0.1)
+
 ##########################################################
 ## Esta funcion retorna true si el valor es un entero   ##
 ##########################################################
@@ -48,81 +62,77 @@ def modificar_tamano_poblacion():
 
 
 
-
+#####################################################
+## Esta funcion modifica el % de la mutación       ##
+#####################################################
 def modificar_porcentaje_mutacion():
-    global mutation_percent    
-    m_size = input("Enter mutation percent (1-5): ")
-    if is_int(m_size):
-        m_size = int(m_size)
-        if 1 <= m_size <= 5:
-            mutation_percent = m_size/100
+    global porcentaje_mutacion    
+    m_tamano = input("Ingrese el % de mutación, entre 1 y 5: ")
+    if es_int(m_tamano):
+        m_tamano = int(m_tamano)
+        if 1 <= m_tamano <= 5:
+            porcentaje_mutacion = m_tamano / 100
         else:
-            input("Outside the range of allowed values, precione ENTER para continuar")
-            modify_mutation_percent()
+            input("El número debe estar entre 1 y 5, precione ENTER para continuar")
+            modificar_porcentaje_mutacion()
     else:
         input("Valor incorrecto, precione ENTER para continuar")
-        modify_mutation_percent()
+        modificar_porcentaje_mutacion()
 
 
+#####################################################
+## Esta funcion modifica el limite de genes        ##
+#####################################################
 def modificar_limite_genes():
-    global limit_gens
-    g_size = input("Enter generations limit (minimum 50): ")
-    if is_int(g_size):
-        g_size = int(g_size)
-        if g_size >= 50:
-            limit_gens = g_size
+    global limite_genes
+    g_tamano = input("Ingrese el límite de generaciones (Al menos 50): ")
+    if es_int(g_tamano):
+        g_tamano = int(g_tamano)
+        if g_tamano >= 50:
+            limite_genes = g_tamano
         else:
-            input("Outside the range of allowed values, press ENTER to go back")
-            modify_limit_gens()
+            input("El número debe ser mayor o igual a 50, precione ENTER para continuar")
+            modificar_limite_genes()
     else:
-        input("Incorrect value, press ENTER to go back")
-        modify_limit_gens()
-
-
-def modificar_elitisto():
-    global eliticism
-    e_value = input("Elitism? (yes:1 no:0): ")
-    if is_int(e_value):
-        e_value = int(e_value)
-        if e_value == 0 or e_value == 1:
-            eliticism = e_value
-    else:
-        input("Incorrect value, press ENTER to go back")
-        modify_elitism()
-
+        input("Valor incorrecto, precione ENTER para continuar")
+        modificar_limite_genes()
         
-def seleccionar_opciones():
-    opcion_seleccionada = input("Choose option: ")
-    try:
-        opcion_seleccionada = int(opcion_seleccionada)
-        if 0 < option < 3:
-            return option
-    except ValueError:
-        input("Datos invalidos, precione ENTER para continuar")
-        return seleccionar_opciones()
 
+
+def agregar_individual(hijo, nuevo_o_viejo): 
+    if (nuevo_o_viejo==0): 
+        poblacion.append(hijo)
+        fitness.append(check(hijo))    
+    else: 
+        descendientes.append(hijo)
+        fitness_new.append(check(hijo)) ## Falta esta funcion de traducir 
+
+
+def generar_poblacion(): 
+    for i in range(tamano_poblacion):
+        individual = []
+        for j in range(tamano_tablero):
+            individual.append(random.randint(0,tamano_tablero-1))
+        agregar_individual(individual, 0)
 
      
     
     
-     
+
 
 def main():
     solution = 0
-    print("\nProblema de N-Reinas con algoritmos genéticos\n")
-    print("To start the program choose the types of values to use\n")
-    print("\n 1.Default values(*)\n 2.Custom values")
-    print("\n(*)Default values: \n\t-Board size: 8 \n\t-Population: 100 individuals\n\t-Generations: 500",
-    	"\n\t-Percent mutation: 2% \n\t-Elitism:No apply\n")
-    
+    print("#####################################################")
+    print("## Problema de N-Reinas con algoritmos genéticos ####")
+    print("#####################################################")
+
     modificar_tamano_tablero()
     modificar_tamano_poblacion()
     modificar_limite_genes()
     modificar_porcentaje_mutacion()
-    modificar_elitisto()
     
-    #steps_flag = choose_step_print()
-    #generate_population()
+
+    generar_poblacion()
     #for i in range(limit_gens): 
     #    create_new_population()
     #    if steps_flag:
